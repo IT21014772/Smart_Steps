@@ -5,7 +5,7 @@ const USE_PROD_APIS = true;
 
 const defaultEndpoints = {
   MAIN_API: (isProduction || USE_PROD_APIS)
-    ? 'https://smart-steps-be.vercel.app/api' 
+    ? 'https://smart-steps-backend.vercel.app/api' 
     : (import.meta.env.VITE_MAIN_API || 'http://localhost:5000'),
     
   COGNITIVE_API: (isProduction || USE_PROD_APIS)
