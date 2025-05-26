@@ -483,9 +483,9 @@ const Profile = () => {
           dislikedLesson: profileData.dislikedLesson,
         });
 
-        // Set up lesson form data
-        const stressLevel = localStorage.getItem("stressLevel") || profileData.stressLevel || "Medium";
-        const cogValue = profileData.cognitivePerformance || localStorage.getItem("cognitivePerformance") || "Average";
+        // Set up lesson form data - NO DEFAULT VALUES FOR NEW USERS
+        const stressLevel = profileData.stressLevel || localStorage.getItem("stressLevel") || "";
+        const cogValue = profileData.cognitivePerformance || localStorage.getItem("cognitivePerformance") || "";
         
         const updatedLessonFormData = { ...lessonFormData };
         updatedLessonFormData.stress_level = stressLevel;
@@ -534,18 +534,24 @@ const Profile = () => {
         
         setLessonFormData(updatedLessonFormData);
 
-        // Always get cognitive performance from API, set default if not available
-        const cogValueForProfile = profileData.cognitivePerformance || "Average";
-        setCognitivePerformance(cogValueForProfile);
+        // Only set cognitive performance if it exists in the database
+        if (profileData.cognitivePerformance) {
+          setCognitivePerformance(profileData.cognitivePerformance);
+        } else {
+          setCognitivePerformance(""); // Empty for new users
+        }
 
-        // Always get stress data from API, set defaults if not available
-        const dbStressLevel = profileData.stressLevel || "Medium";
-        const dbStressProbability = profileData.stressProbability;
+        // Only set stress data if it exists in the database
+        if (profileData.stressLevel) {
+          setStressLevel(profileData.stressLevel);
+        } else {
+          setStressLevel(""); // Empty for new users
+        }
         
-        setStressLevel(dbStressLevel);
-        
-        if (dbStressProbability !== undefined && dbStressProbability !== null) {
-          setStressProbability(dbStressProbability);
+        if (profileData.stressProbability !== undefined && profileData.stressProbability !== null) {
+          setStressProbability(profileData.stressProbability);
+        } else {
+          setStressProbability(null); // Null for new users
         }
 
         const email = profileData.email;
@@ -583,8 +589,8 @@ const Profile = () => {
           console.log("Peer preference not found");
         }
 
-        // Make new predictions if applicable
-        if (profileData) {
+        // Only make new predictions if user has assessment data
+        if (profileData && profileData.stressLevel && profileData.cognitivePerformance) {
           await handleLessonPrediction(profileData);
           await handlePeerPrediction(profileData);
         }
@@ -899,14 +905,18 @@ const Profile = () => {
                       
                       <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                         <span className="font-medium text-blue-900">Cognitive Performance</span>
-                        <Badge className="bg-blue-600 text-white">{getDisplayLabel(cognitivePerformance)}</Badge>
+                        <Badge className="bg-blue-600 text-white">
+                          {cognitivePerformance ? getDisplayLabel(cognitivePerformance) : "Not assessed"}
+                        </Badge>
                       </div>
 
                       {/* Stress Level - Read Only Display */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                           <span className="font-medium text-blue-900">Stress Level</span>
-                          <Badge className="bg-blue-600 text-white">{stressLevel}</Badge>
+                          <Badge className="bg-blue-600 text-white">
+                            {stressLevel || "Not assessed"}
+                          </Badge>
                         </div>
                         {stressProbability !== null && (
                           <p className="text-sm text-blue-600 ml-3">Stress Probability: {(stressProbability * 100).toFixed(1)}%</p>
@@ -1068,11 +1078,15 @@ const Profile = () => {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-white p-3 rounded-md border border-blue-100 text-center">
                             <p className="text-sm text-gray-500 mb-1">Stress Level</p>
-                            <p className="text-lg font-bold text-blue-800">{lessonFormData.stress_level || "Not specified"}</p>
+                            <p className="text-lg font-bold text-blue-800">
+                              {lessonFormData.stress_level || "Not assessed"}
+                            </p>
                           </div>
                           <div className="bg-white p-3 rounded-md border border-blue-100 text-center">
                             <p className="text-sm text-gray-500 mb-1">Cognitive Performance</p>
-                            <p className="text-lg font-bold text-blue-800">{lessonFormData.cognitive_performance || "Not specified"}</p>
+                            <p className="text-lg font-bold text-blue-800">
+                              {lessonFormData.cognitive_performance || "Not assessed"}
+                            </p>
                           </div>
                         </div>
                       </div>

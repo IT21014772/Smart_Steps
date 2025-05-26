@@ -66,27 +66,25 @@ const Home = () => {
         const userData = profileResponse.data;
         const email = userData.email;
 
-        // Handle cognitive performance from database only
+        // Get raw values from database (could be null, undefined, or actual values)
         const cogValue = userData.cognitivePerformance;
-        setCognitivePerformance(cogValue || "");
-
-        // Handle stress data from database only
         const dbStressLevel = userData.stressLevel;
         const dbStressProbability = userData.stressProbability;
-        
+
+        // Set display values (use empty string for UI display when no data)
+        setCognitivePerformance(cogValue || "");
         setStressLevel(dbStressLevel || "");
         setStressProbability(dbStressProbability || null);
 
-        console.log("Home - Stress data loaded:", {
+        console.log("Home - Assessment data loaded:", {
+          cogValue,
           dbStressLevel,
           dbStressProbability
         });
 
-        // Check if cognitive assessment is completed
-        const cognitiveCompleted = cogValue && cogValue !== "";
-        
-        // Check stress level completion
-        const stressCompleted = dbStressLevel && dbStressLevel !== "";
+        // Check completion based on actual database values (not display values)
+        const cognitiveCompleted = cogValue && cogValue !== "" && cogValue !== null && cogValue !== undefined;
+        const stressCompleted = dbStressLevel && dbStressLevel !== "" && dbStressLevel !== null && dbStressLevel !== undefined;
         
         // Fetch content preferences
         let contentData = null;
@@ -96,7 +94,7 @@ const Home = () => {
             `${config.api.getUrl('MAIN_API', '/api/content')}?email=${email}`
           );
           contentData = contentResponse.data;
-          contentCompleted = true;
+          contentCompleted = contentData && contentData.preferences && contentData.preferences !== "";
         } catch (err) {
           console.log("Content preference not found");
         }
@@ -133,6 +131,13 @@ const Home = () => {
             data: lessonData 
           }
         });
+
+        console.log("Assessment status updated:", {
+          cognitiveCompleted,
+          stressCompleted,
+          contentCompleted,
+          lessonCompleted
+        });
         
       } catch (error) {
         console.error("Error fetching assessment data:", error);
@@ -155,7 +160,9 @@ const Home = () => {
   const calculateCompletionPercentage = () => {
     const assessments = Object.values(assessmentStatus);
     const completed = assessments.filter(a => a.completed).length;
-    return (completed / assessments.length) * 100;
+    const percentage = (completed / assessments.length) * 100;
+    console.log("Completion calculation:", { completed, total: assessments.length, percentage });
+    return percentage;
   };
 
   // Determine current step and what's accessible
@@ -171,7 +178,7 @@ const Home = () => {
     {
       id: 1,
       title: "Cognitive Assessment",
-      // description: "Measure your cognitive abilities and identify your learning strengths.",
+      description: "Measure your cognitive abilities and identify your learning strengths.",
       image: "https://images.unsplash.com/photo-1565022536102-f7645c84354a?auto=format&fit=crop&q=80&w=500",
       path: "/cognitive",
       status: assessmentStatus.cognitive,
@@ -184,7 +191,7 @@ const Home = () => {
     {
       id: 2,
       title: "Stress Assessment", 
-      // description: "Evaluate your current stress levels with our scientifically validated assessment tool.",
+      description: "Evaluate your current stress levels with our scientifically validated assessment tool.",
       image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=500",
       path: "/stress",
       status: assessmentStatus.stress,
@@ -197,7 +204,7 @@ const Home = () => {
     {
       id: 3,
       title: "Content Preference",
-      // description: "Tell us about your learning preferences to get personalized recommendations.",
+      description: "Tell us about your learning preferences to get personalized recommendations.",
       image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=500",
       path: "/all",
       status: assessmentStatus.content,
@@ -210,7 +217,7 @@ const Home = () => {
     {
       id: 4,
       title: "Lesson Prediction",
-      // description: "Get customized lesson recommendations based on your profile.",
+      description: "Get customized lesson recommendations based on your profile.",
       image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=500",
       path: "/lesson-prediction",
       status: assessmentStatus.lesson,
@@ -398,7 +405,7 @@ const Home = () => {
                         {step.id === 3 && assessmentStatus.content.data && assessmentStatus.content.data.preferences && (
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-slate-600">Content Preference</span>
-                            <Badge variant="secondary" className={`${step.textColor} max-w-[120px] truncate`}> {/* Add max-width and truncate */}
+                            <Badge variant="secondary" className={`${step.textColor} max-w-[120px] truncate`}>
                               {typeof assessmentStatus.content.data.preferences === 'string' 
                                 ? assessmentStatus.content.data.preferences
                                 : assessmentStatus.content.data.preferences?.lesson || "No recommendation"
@@ -409,7 +416,7 @@ const Home = () => {
                         {step.id === 4 && assessmentStatus.lesson.data && assessmentStatus.lesson.data.preferences && (
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-slate-600">Top Lesson</span>
-                            <Badge variant="secondary" className={`${step.textColor} max-w-[120px] truncate`}> {/* Add max-width and truncate */}
+                            <Badge variant="secondary" className={`${step.textColor} max-w-[120px] truncate`}>
                               {Array.isArray(assessmentStatus.lesson.data.preferences) 
                                 ? assessmentStatus.lesson.data.preferences[0]?.lesson || "No preference"
                                 : typeof assessmentStatus.lesson.data.preferences === 'string' 
