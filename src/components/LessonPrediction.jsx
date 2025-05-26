@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,8 +17,12 @@ import config from '../config';
 
 const LessonPrediction = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [userLoading, setUserLoading] = useState(true);
+  
+  // Determine the source page (default to /filtered if not specified)
+  const sourceRoute = location.state?.from || '/filtered';
   
   const [formData, setFormData] = useState({
     stress_level: "",
@@ -478,9 +482,9 @@ const LessonPrediction = () => {
                   <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
                     <Button
                       className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => navigate("/filtered")}
+                      onClick={() => navigate(sourceRoute)}
                     >
-                      View Recommended Courses
+                      {sourceRoute === '/all' ? 'View All Courses' : 'View Recommended Courses'}
                     </Button>
                     
                     <Button

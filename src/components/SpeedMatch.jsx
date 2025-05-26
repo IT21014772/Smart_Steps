@@ -138,7 +138,9 @@ const SpeedMatch = () => {
   }, [gameOver, score, totalMatches]);
 
   const handleNavigateToCognitive = () => {
-    window.location.href = "/cognitive";
+    setTimeout(() => {
+      navigate("/cognitive");
+    }, 100);
   };
   
   return (
