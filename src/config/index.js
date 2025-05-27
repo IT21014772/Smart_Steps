@@ -5,8 +5,8 @@ const USE_PROD_APIS = true;
 
 const defaultEndpoints = {
   MAIN_API: (isProduction || USE_PROD_APIS)
-    // ? 'https://smart-steps-backend.vercel.app/api' 
-    ? 'http://localhost:5000/api'
+    ? 'https://smart-steps-backend.vercel.app/api' 
+    // ? 'http://localhost:5000/api'
     : (import.meta.env.VITE_MAIN_API || 'http://localhost:5000'),
     
   COGNITIVE_API: (isProduction || USE_PROD_APIS)
@@ -14,11 +14,11 @@ const defaultEndpoints = {
     : (import.meta.env.VITE_COGNITIVE_API || 'http://localhost:5005'),
     
   LESSON_PREDICTION_API: (isProduction || USE_PROD_APIS)
-    ? 'https://keheliyavimu-lesson_preference.hf.space' 
+    ? 'https://keheliyavimu-keheliya 1.hf.space' 
     : (import.meta.env.VITE_LESSON_API || 'http://localhost:5001'),
     
   PEER_PREDICTION_API: (isProduction || USE_PROD_APIS)
-    ? 'https://keheliyavimu-peer_prediction.hf.space' 
+    ? 'https://keheliyavimu-keheliya 2.hf.space' 
     : (import.meta.env.VITE_PEER_API || 'http://localhost:5002'),
     
   CONTENT_PREFERENCE_API: (isProduction || USE_PROD_APIS)
